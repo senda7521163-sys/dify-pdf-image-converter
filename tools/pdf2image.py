@@ -41,12 +41,15 @@ class Pdf2imageTool(Tool):
         # If no blob, try to fetch from URL
         if hasattr(file, 'remote_url') and file.remote_url:
             logger.info(f"Fetching file from URL for {file.filename}")
-
             # Check if it's a relative URL that needs a base URL
             url = file.remote_url
+            base_url = os.getenv('FILES_URL', '')
+            if base_url and base_url in url:
+                internal_url = os.getenv('INTERNAL_FILES_URL')
+                if internal_url:
+                    url = url.replace(base_url, internal_url)
             if url.startswith('/'):
                 # Try to get base URL from environment or use default
-                base_url = os.getenv('FILES_URL', '')
                 if not base_url:
                     # Try common Dify URLs
                     possible_bases = [
